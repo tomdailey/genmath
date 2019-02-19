@@ -1,0 +1,211 @@
+
+;; Added by Package.el.  This must come before configurations of
+;; installed packages.  Don't delete this line.  If you don't want it,
+;; just comment it out by adding a semicolon to the start of the line.
+;; You may delete these explanatory comments.
+
+
+(setq package-archives
+      '(("melpa" . "https://melpa.org/packages/")
+        ("gnu" . "https://elpa.gnu.org/packages/")
+        ("org" . "http://orgmode.org/elpa/")))
+
+(package-initialize)
+
+(require 'org)
+
+(setq inhibit-splash-screen t)
+
+;; Enable transient mark mode
+(transient-mark-mode 1)
+
+;;;;Org mode configuration
+
+(global-set-key "\C-cl" 'org-store-link)
+(global-set-key "\C-ca" 'org-agenda)
+(global-set-key "\C-cc" 'org-capture)
+(global-set-key "\C-cb" 'org-switchb)
+
+(setq org-directory "~/org")
+(setq org-agenda-files '("~/org"))
+(setq org-default-notes-file (concat org-directory "/notes.org"))
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages (quote (ox-reveal academic-phrases gnuplot gnuplot-mode))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+
+;; active Babel languages
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((gnuplot . t)))
+;; add additional languages with '((language . t)))
+
+;; Org to display inline images by default:
+(setq org-display-inline-images t)
+(setq org-redisplay-inline-images t)
+(setq org-startup-with-inline-images "inlineimages")
+(setq org-log-done t)
+
+;; Babel to update inline images on execution
+(add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
+
+;; Reveal.js + Org mode
+;; via https://opensource.com/article/18/2/how-create-slides-emacs-org-mode-and-revealjs
+(require 'ox-reveal)
+(setq org-reveal-root "file:///home/tom/reveal.js")
+(setq org-reveal-title-slide nil)
+
+
+;; Weird stuff and experiments To be gotton rid of
+
+(defvar valeriy-alist '((?1 "Cow" (lambda () (message "I am a cow") 'cow))
+            (?2 "Rabbit" (lambda () (message "I am a lion") 'lion))
+            (?3 "Dog" (lambda () (insert "I am a wolf") 'wolf)))
+  "List that associates number letters to descriptions and actions.")
+
+(defun valeriy-choose ()
+  "Lets the user choose the animal and takes the corresponding action.
+Returns whatever the action returns."
+  (interactive)
+  (let ((choice (read-char-choice (mapconcat (lambda (item) (format "%c: %s" (car item) (cadr item))) valeriy-alist "; ")
+                  (mapcar #'car valeriy-alist))))
+    (funcall (nth 2 (assoc choice valeriy-alist)))))
+
+(setf *random-state* (make-random-state t))
+
+(defun intop-prob ()
+  (interactive)
+  (let ( (protype (random 4)) )
+    ;; 0-add 1-sub 2-mult 3-div
+    (insert (format "$ (%d) %s (%d) = $"
+		    (- (random 100) 50)
+		    (nth protype '("+" "-" "\\cdot" "\\div"))
+		    (- (random 100) 50) ))
+    ))
+(defun add-subt-intop-prob ()
+  (interactive)
+  (let ( (protype (random 2)) )
+    ;; 0-add 1-sub 2-mult 3-div
+    (insert (format "$ (%d) %s (%d) = $"
+		    (- (random 100) 50)
+		    (nth protype '("+" "-" "\\cdot" "\\div"))
+		    (- (random 100) 50) ))
+    ))
+
+(defun misop-prob ()
+  "Missing operation problem"
+  (interactive)
+  (let ( (protype (random 4)) )
+    ;; 0-add 1-sub 2-mult 3-div
+    (insert (format "$ (%d) %s %s = %d $"
+		    (- (random 100) 50)
+		    (nth protype '("+" "-" "\\cdot" "\\div"))
+		    (nth (random 5) '("a" "b" "x" "y" "k" "z"))
+		    (- (random 100) 50) ))
+    ))
+
+;; (defun get-num (type)
+;;   (cond ;; 1 - positive integer, less than 20
+;;    ((equal type 1) (
+
+;; (defun integer_op_prob ()
+;;   (interactive)
+;;   (insert (format "$ (%d) %s (%d) = $"
+;; 		  (- (random 100) 50)
+;; 		  (format "\cdot")
+;; 		  (- (random 100) 50)
+;; 		  )))
+
+(defun latify (expr)
+  (if (listp (quote expr))
+      (format "%s %s %s"
+	      (latify (second (quote expr)))
+	      (first expr)
+	      (latify (third (quote expr))))
+      (format "%s %s %s"
+	      (second (quote expr))
+	      (first (quote expr))
+	      (third (quote expr)))))
+
+(defun rand-simp-expression ()
+  (interactive)
+  (let ((n 8)
+	(opps '("\\div" "\\cdot" "+" "-"))
+	(expr (format "%s" (random 20))))
+    (while (> n 0)
+      (setf expr (format "%s %s %s" expr (nth (random 4) opps)
+			 (random 20)))
+      (setf n (- n 1))
+      )
+    (insert expr)))
+
+(defun rand-number ()
+  (interactive)
+  (insert (format "%d" (random 100))))
+
+(defun rnum ()
+  (format "%d" (random 20)))
+
+(defun rand-expression ()
+  (interactive)
+  (insert (format "%s" (expand-expression '(+ (rnum) (rnum)) 4))))
+
+(expand-expression '(+ 3 2) 7)
+
+(defun expand-expression ()
+  "Expand x into an equivalent expression by rescanning"
+  (interative)
+  (let ((x '(+ (random 20) (random 20)))
+	(n (random 20)))
+ (while (> n 0)
+  (setf n (- n 1))
+  (setf x (expand-expression-once x)))
+ (insert x)))
+
+
+
+(expand-expression (+ 2 3) 4)
+
+(defun expand-expression-once (x)
+ "Expands expressions into equivalent ones"
+ (if (listp x)
+     (let ((place (random-part-of-expression x)))
+      (setf (nth place x) (expand-expression-once (nth place x)))
+      x)
+   (expand-number x)))
+
+(defun random-part-of-expression (x)
+ "Returns random location of an expression"
+ (1+ (random (1- (length x)))))
+
+(defun expand-number (x)
+ "Takes number and creates lisp sexp that evaluates to it"
+ (let 
+  ((choice (random 4)) ; add, sub, mult, div, exp
+  (newnum (- (random 100) 40)))
+ (when (= newnum 0) (setf newnum 2))
+ (pcase choice
+  (0 ; addition
+   (list '+ newnum (- x newnum)))
+  (1 ; subtraction
+   (list '- (+ newnum x) newnum))
+  (2 ; multiplication
+   (list '* (/ (* x 1.0) newnum) newnum))
+  (3 ; division
+   (list '/ (* newnum x) newnum)))))
+
+(expand-number 7)
+
+(visual-line-mode)
+
+(put 'downcase-region 'disabled nil)
