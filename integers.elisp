@@ -1,0 +1,116 @@
+;; Make Math functions
+(setf *random-state* (make-random-state t))
+
+(defun intop-prob ()
+  (interactive)n
+  (let ( (protype (random 4)) )
+    ;; 0-add 1-sub 2-mult 3-div
+    (insert (format "$ (%d) %s (%d) = $"
+		    (- (random 100) 50)
+		    (nth protype '("+" "-" "\\cdot" "\\div"))
+		    (- (random 100) 50) ))))
+
+(defun add-subt-intop-prob ()
+  (interactive)
+  (let ( (protype (random 2)) )
+    ;; 0-add 1-sub 2-mult 3-div
+    (insert (format "$ (%d) %s (%d) = $"
+		    (- (random 100) 50)
+		    (nth protype '("+" "-"))
+		    (- (random 100) 50) ))))
+
+;; (defun misop-prob ()
+;;   "Missing operation problem"
+;;   (interactive)
+;;   (let ( (protype (random 4))
+;; 	 (num1 (- (random 100) 50))
+;;     	 (num2 (- (random 100) 50)) )
+;;     ;; 0-add 1-sub 2-mult 3-div
+;;     (insert (format "$ (%d) %s %d = %d $"
+;; 		    num1
+;; 		    "/msquare"
+;; 		    num2
+;; 		    (eval '(nth protype '("+" "-" "*" "/")))
+
+
+(defun latify (expr)
+  (if (listp (quote expr))
+      (format "%s %s %s"
+	      (latify (second (quote expr)))
+	      (first expr)
+	      (latify (third (quote expr))))
+      (format "%s %s %s"
+	      (second (quote expr))
+	      (first (quote expr))
+	      (third (quote expr)))))
+
+(defun rand-simp-expression ()
+  (interactive)
+  (let ((n 8)
+	(opps '("\\div" "\\cdot" "+" "-"))
+	(expr (format "%s" (random 20))))
+    (while (> n 0)
+      (setf expr (format "%s %s %s" expr (nth (random 4) opps)
+			 (random 20)))
+      (setf n (- n 1))
+      )
+    (insert expr)))
+
+(defun rand-number ()
+  (interactive)
+  (insert (format "%d" (random 100))))
+
+(defun rnum ()
+  (format "%d" (random 20)))
+
+(defun rand-expression ()
+  (interactive)
+  (insert (format "%s" (expand-expression '(+ (rnum) (rnum)) 4))))
+
+(expand-expression '(+ 3 2) 7)
+
+(defun expand-expression ()
+  "Expand x into an equivalent expression by rescanning"
+  (interative)
+  (let ((x '(+ (random 20) (random 20)))
+	(n (random 20)))
+ (while (> n 0)
+  (setf n (- n 1))
+  (setf x (expand-expression-once x)))
+ (insert x)))
+
+
+
+(expand-expression (+ 2 3) 4)
+
+(defun expand-expression-once (x)
+ "Expands expressions into equivalent ones"
+ (if (listp x)
+     (let ((place (random-part-of-expression x)))
+      (setf (nth place x) (expand-expression-once (nth place x)))
+      x)
+   (expand-number x)))
+
+(defun random-part-of-expression (x)
+ "Returns random location of an expression"
+ (1+ (random (1- (length x)))))
+
+(defun expand-number (x)
+ "Takes number and creates lisp sexp that evaluates to it"
+ (let 
+  ((choice (random 4)) ; add, sub, mult, div, exp
+  (newnum (- (random 100) 40)))
+ (when (= newnum 0) (setf newnum 2))
+ (pcase choice
+  (0 ; addition
+   (list '+ newnum (- x newnum)))
+  (1 ; subtraction
+   (list '- (+ newnum x) newnum))
+  (2 ; multiplication
+   (list '* (/ (* x 1.0) newnum) newnum))
+  (3 ; division
+   (list '/ (* newnum x) newnum)))))
+
+(expand-number 7)
+
+(visual-line-mode)
