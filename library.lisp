@@ -4,8 +4,8 @@
 
 \\documentclass[12pt]{article} % Specifies font size
 \\usepackage[margin=1in]{geometry} % Sets all four margins to 1 inch
-\\usepackage{amssymb} % Access to extra math symbols
-\\usepackage{amsmath} % Access to extra math symbols
+\\usepackage{amssymb} % Access to extra maths symbols
+\\usepackage{amsmath} % Access to extra maths symbols
 \\pagestyle{empty} % Ensures that no page numbers are printed
 \\parskip = 0.2 in % Puts a little space between paragraphs 
 \\parindent = 0.0 in % Enforces no indentation for paragraphs
